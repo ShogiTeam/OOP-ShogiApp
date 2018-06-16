@@ -1,0 +1,15 @@
+C:\Users\felix\Desktop\Schach\Schach\bin\Debug\Schach.exe.config
+C:\Users\felix\Desktop\Schach\Schach\bin\Debug\Schach.exe
+C:\Users\felix\Desktop\Schach\Schach\bin\Debug\Schach.pdb
+C:\Users\felix\Desktop\Schach\Schach\obj\Debug\Schach.csprojResolveAssemblyReference.cache
+C:\Users\felix\Desktop\Schach\Schach\obj\Debug\MainWindow.g.cs
+C:\Users\felix\Desktop\Schach\Schach\obj\Debug\App.g.cs
+C:\Users\felix\Desktop\Schach\Schach\obj\Debug\Schach_MarkupCompile.cache
+C:\Users\felix\Desktop\Schach\Schach\obj\Debug\Schach_MarkupCompile.lref
+C:\Users\felix\Desktop\Schach\Schach\obj\Debug\MainWindow.baml
+C:\Users\felix\Desktop\Schach\Schach\obj\Debug\Schach.g.resources
+C:\Users\felix\Desktop\Schach\Schach\obj\Debug\Schach.Properties.Resources.resources
+C:\Users\felix\Desktop\Schach\Schach\obj\Debug\Schach.csproj.GenerateResource.Cache
+C:\Users\felix\Desktop\Schach\Schach\obj\Debug\Schach.csproj.CoreCompileInputs.cache
+C:\Users\felix\Desktop\Schach\Schach\obj\Debug\Schach.exe
+C:\Users\felix\Desktop\Schach\Schach\obj\Debug\Schach.pdb

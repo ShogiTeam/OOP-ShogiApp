@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2010
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Schach", "Schach\Schach.csproj", "{5BF998BE-BEC9-49B6-B9A0-3B75595EE33E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5BF998BE-BEC9-49B6-B9A0-3B75595EE33E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5BF998BE-BEC9-49B6-B9A0-3B75595EE33E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5BF998BE-BEC9-49B6-B9A0-3B75595EE33E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5BF998BE-BEC9-49B6-B9A0-3B75595EE33E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D469A962-F817-4E91-8555-5A151CA0F6FC}
+	EndGlobalSection
+EndGlobal
