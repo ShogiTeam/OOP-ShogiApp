@@ -1,0 +1,15 @@
+C:\Users\SarVarTar\Documents\Visual Studio 2017\Projects\Shogi_v_1_2\Shogi_v_1_0\obj\Fertig\Shogi_v_1_0.csprojAssemblyReference.cache
+C:\Users\SarVarTar\Documents\Visual Studio 2017\Projects\Shogi_v_1_2\Shogi_v_1_0\obj\Fertig\MainWindow.g.cs
+C:\Users\SarVarTar\Documents\Visual Studio 2017\Projects\Shogi_v_1_2\Shogi_v_1_0\obj\Fertig\App.g.cs
+C:\Users\SarVarTar\Documents\Visual Studio 2017\Projects\Shogi_v_1_2\Shogi_v_1_0\obj\Fertig\Shogi_v_1_0_MarkupCompile.cache
+C:\Users\SarVarTar\Documents\Visual Studio 2017\Projects\Shogi_v_1_2\Shogi_v_1_0\obj\Fertig\Shogi_v_1_0_MarkupCompile.lref
+C:\Users\SarVarTar\Documents\Visual Studio 2017\Projects\Shogi_v_1_2\Shogi_v_1_0\obj\Fertig\MainWindow.baml
+C:\Users\SarVarTar\Documents\Visual Studio 2017\Projects\Shogi_v_1_2\Shogi_v_1_0\obj\Fertig\Shogi_v_1_0.g.resources
+C:\Users\SarVarTar\Documents\Visual Studio 2017\Projects\Shogi_v_1_2\Shogi_v_1_0\obj\Fertig\Shogi_v_1_0.Properties.Resources.resources
+C:\Users\SarVarTar\Documents\Visual Studio 2017\Projects\Shogi_v_1_2\Shogi_v_1_0\obj\Fertig\Shogi_v_1_0.csproj.GenerateResource.cache
+C:\Users\SarVarTar\Documents\Visual Studio 2017\Projects\Shogi_v_1_2\Shogi_v_1_0\obj\Fertig\Shogi_v_1_0.csproj.CoreCompileInputs.cache
+C:\Users\SarVarTar\Documents\Visual Studio 2017\Projects\Shogi_v_1_2\Shogi_v_1_0\obj\Fertig\Shogi_v_1_0.exe
+C:\Users\SarVarTar\Documents\Visual Studio 2017\Projects\Shogi_v_1_2\Shogi_v_1_0\obj\Fertig\Shogi_v_1_0.pdb
+C:\Users\SarVarTar\Documents\Visual Studio 2017\Projects\Shogi_v_1_2\Shogi_v_1_0.exe.config
+C:\Users\SarVarTar\Documents\Visual Studio 2017\Projects\Shogi_v_1_2\Shogi_v_1_0.exe
+C:\Users\SarVarTar\Documents\Visual Studio 2017\Projects\Shogi_v_1_2\Shogi_v_1_0.pdb
