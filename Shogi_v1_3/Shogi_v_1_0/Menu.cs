@@ -1,16 +1,12 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Shogi_v_1_0
 {
     class Menu
     {
-        public int WinCondition(bool isKing, int color)
+        static public int WinCondition(bool isKing, int color)
         {
             if (isKing == true && color == 1)
             {
@@ -38,17 +34,17 @@ namespace Shogi_v_1_0
         }
 
         //assings starting positions to all Pieces
-        public void SetPiecePositions(Piece[] whitePieces, Piece[] blackPieces)
+        static public void SetPiecePositions(Piece[] whitePieces, Piece[] blackPieces)
         {
             int index;
 
             //set initial Pawn positions
-            for(index=0; index<=9; index++)
+            for (index = 0; index <= 9; index++)
             {
                 Grid.SetRow(whitePieces[index], 3);
                 Grid.SetRow(blackPieces[index], 7);
-                Grid.SetColumn(whitePieces[index], index+1);
-                Grid.SetColumn(blackPieces[index], index+1);
+                Grid.SetColumn(whitePieces[index], index + 1);
+                Grid.SetColumn(blackPieces[index], index + 1);
             }
 
             //set initial Tower positions
@@ -63,7 +59,7 @@ namespace Shogi_v_1_0
             Grid.SetColumn(blackPieces[10], 3);
 
             //set initial special Piece Rows
-            for(index=11; index<20; index++)
+            for (index = 11; index < 20; index++)
             {
                 Grid.SetRow(whitePieces[index], 1);
                 Grid.SetRow(blackPieces[index], 9);
@@ -96,9 +92,9 @@ namespace Shogi_v_1_0
         }
 
         //sets correct Field colors for default board state
-        public void InitFieldColors(Field[,] Field)
+        static public void InitFieldColors(Field[,] Field)
         {
-          //  int indexRow;
+            //  int indexRow;
             int indexColumn;
 
             for (indexColumn = 1; indexColumn <= 9; indexColumn++)
@@ -119,11 +115,11 @@ namespace Shogi_v_1_0
         }
 
         //resets color, promotion and capture values to default
-        public void ResetPieceStates(Piece[] whitePieces, Piece[] blackPieces)
+        static public void ResetPieceStates(Piece[] whitePieces, Piece[] blackPieces)
         {
             int index;
 
-            for(index=0; index<20; index++)
+            for (index = 0; index < 20; index++)
             {
                 whitePieces[index].SetColor(1);
                 whitePieces[index].SetIsCaptured(false);
@@ -134,23 +130,52 @@ namespace Shogi_v_1_0
             }
         }
 
-        //sets all fieldcolors to neutral value 2 and frees fields outside the board
-        public void ResetFieldColors(Field[,] Field)
+        //sets all playable fieldcolors to neutral value(2)
+        static public void ResetFieldColors(Field[,] Field)
         {
             int column;
             int row;
 
-            for(column=1; column<10; column++)
+            for (column = 1; column < 10; column++)
             {
-                for(row=0; row<11; row++)
+                for (row = 0; row < 11; row++)
                 {
                     Field[row, column].SetColor(2);
-
-                    if(row==0 || row==10)
-                    {
-                        Field[row, column].SetPermission(true); 
-                    }
                 }
+            }
+        }
+
+        static public void ResetPieceCounter(PieceCounter[] blackPieceCounter, PieceCounter[] whitePieceCounter)
+        {
+            int index;
+            for (index = 0; index < 7; index++)
+            {
+                blackPieceCounter[index].ResetCounter();
+                whitePieceCounter[index].ResetCounter();
+            }
+        }
+
+        //Write active Player Message on Board
+        static public void Player(TextBlock TurnLine, Grid TheGrid)
+        {
+            TurnLine.TextAlignment = TextAlignment.Center;
+            TurnLine.VerticalAlignment = VerticalAlignment.Center;
+            Grid.SetColumnSpan(TurnLine, 2);
+            TurnLine.Text = "Whites Turn";
+            TheGrid.Children.Add(TurnLine);
+            Grid.SetRow(TurnLine, 0);
+            Grid.SetColumn(TurnLine, 9);
+        }
+
+        static public void SetPlayerText(TextBlock TurnLine, int Player)
+        {
+            if (Player == 1)
+            {
+                TurnLine.Text = "Whites Turn";
+            }
+            else
+            {
+                TurnLine.Text = "Blacks Turn";
             }
         }
     }

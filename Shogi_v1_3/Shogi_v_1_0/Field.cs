@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Controls;
+﻿using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows;
 
@@ -18,7 +13,7 @@ namespace Shogi_v_1_0
         public Field(int row, int column, int color)
         {
             Background = Brushes.LightGray;
-            BorderThickness = new Thickness (1,1,0,0);
+            BorderThickness = new Thickness(1, 1, 0, 0);
             BorderBrush = Brushes.Black;
             allegiance = color;
             allowed = false;

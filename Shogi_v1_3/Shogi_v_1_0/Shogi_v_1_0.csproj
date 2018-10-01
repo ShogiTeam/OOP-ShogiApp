@@ -54,6 +54,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Bishop.cs" />
+    <Compile Include="GoldGeneral.cs" />
+    <Compile Include="Hints.cs" />
+    <Compile Include="King.cs" />
+    <Compile Include="Knight.cs" />
+    <Compile Include="SilverGeneral.cs" />
+    <Compile Include="Tower.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -62,6 +69,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Lance.cs" />
     <Compile Include="Menu.cs" />
     <Compile Include="Field.cs" />
     <Compile Include="MainWindow.xaml.cs">
@@ -70,6 +78,8 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Pawn.cs" />
+    <Compile Include="PieceCounter.cs" />
     <Compile Include="Piece.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
@@ -95,6 +105,36 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Properties\BishopBlack.bmp" />
+    <Resource Include="Properties\BishopPromotedBlack.bmp" />
+    <Resource Include="Properties\BishopPromotedWhite.bmp" />
+    <Resource Include="Properties\BishopWhite.bmp" />
+    <Resource Include="Properties\GoldGeneralBlack.bmp" />
+    <Resource Include="Properties\GoldGeneralWhite.bmp" />
+    <Resource Include="Properties\KingBlack.bmp" />
+    <Resource Include="Properties\KingWhite.bmp" />
+    <Resource Include="Properties\KnightBlack.bmp" />
+    <Resource Include="Properties\KnightPromotedBlack.bmp" />
+    <Resource Include="Properties\KnightPromotedWhite.png" />
+    <Resource Include="Properties\KnightWhite.bmp" />
+    <Resource Include="Properties\LanceBlack.bmp" />
+    <Resource Include="Properties\LancePromotedBlack.bmp" />
+    <Resource Include="Properties\LancePromotedWhite.bmp" />
+    <Resource Include="Properties\LanceWhite.bmp" />
+    <Resource Include="Properties\PawnBlack.bmp" />
+    <Resource Include="Properties\PawnPromotedBlack.bmp" />
+    <Resource Include="Properties\PawnPromotedWhite.bmp" />
+    <Resource Include="Properties\PawnWhite.bmp" />
+    <Resource Include="Properties\SilverGeneralBlack.bmp" />
+    <Resource Include="Properties\SilverGeneralPromotedBlack.bmp" />
+    <Resource Include="Properties\SilverGeneralPromotedWhite.bmp" />
+    <Resource Include="Properties\SilverGeneralWhite.bmp" />
+    <Resource Include="Properties\TowerBlack.bmp" />
+    <Resource Include="Properties\TowerPromotedBlack.bmp" />
+    <Resource Include="Properties\TowerPromotedWhite.bmp" />
+    <Resource Include="Properties\TowerWhite.bmp" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

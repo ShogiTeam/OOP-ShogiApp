@@ -1,19 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Security;
-using System.Security.Permissions;
 
 
 namespace Shogi_v_1_0
@@ -28,32 +16,39 @@ namespace Shogi_v_1_0
         Field[,] Field = new Field[11, 11];
         Piece[] whitePieces = new Piece[20];
         Piece[] blackPieces = new Piece[20];
+        PieceCounter[] blackPieceCounter = new PieceCounter[7];
+        PieceCounter[] whitePieceCounter = new PieceCounter[7];
         Piece activePiece = null;
         Field activeField = null;
         Menu mainMenu = new Menu();
+        TextBlock TurnLine = new TextBlock();
+
         int activePlayer = 1;
 
         public MainWindow()
         {
             InitializeComponent();
-            FileIOPermission f = new FileIOPermission(PermissionState.None);
-            f.AllLocalFiles = FileIOPermissionAccess.Read;
-            try
-            {
-                f.Demand();
-            }
-            catch (SecurityException s)
-            {
-                Console.WriteLine(s.Message);
-            }
-            FileIOPermission f2 = new FileIOPermission(FileIOPermissionAccess.Read, "C:\\Users\\saves");
-            f2.AddPathList(FileIOPermissionAccess.Write | FileIOPermissionAccess.Read, "C:\\Users\\saves");
-
             DrawBoard();
+            DrawCounter();
             GeneratePieces();
             DrawPieces();
-            mainMenu.SetPiecePositions(whitePieces, blackPieces);
-            mainMenu.InitFieldColors(Field);
+            Menu.SetPiecePositions(whitePieces, blackPieces);
+            Menu.InitFieldColors(Field);
+            Menu.Player(TurnLine, TheGrid);
+        }
+
+        //draw counter for captured Pieces per Type
+        public void DrawCounter()
+        {
+            int index;
+
+            for (index = 0; index < 7; index++)
+            {
+                blackPieceCounter[index] = new PieceCounter(10, index + 1);
+                TheGrid.Children.Add(blackPieceCounter[index]);
+                whitePieceCounter[index] = new PieceCounter(0, index + 1);
+                TheGrid.Children.Add(whitePieceCounter[index]);
+            }
         }
 
         //draws board visuals with neutral fieldcolors
@@ -123,8 +118,6 @@ namespace Shogi_v_1_0
             blackPieces[18] = new GoldGeneral(10, 10, 0);
             whitePieces[19] = new King(0, 0, 1);
             blackPieces[19] = new King(10, 10, 0);
-            whitePieces[19].SetIsKing(true);
-            blackPieces[19].SetIsKing(true);
         }
 
         //sets initial pieces and colors
@@ -146,6 +139,7 @@ namespace Shogi_v_1_0
         public void Highlight(object sender, RoutedEventArgs e)
         {
             Piece selectedPiece = sender as Piece;
+
             int selectedPieceColor = selectedPiece.GetColor();
 
             if (activePiece == null) //first selection
@@ -154,24 +148,25 @@ namespace Shogi_v_1_0
                 {
                     activePiece = selectedPiece;
                     activePiece.Background = Brushes.Red;
-                    if (activePiece.GetIsCaptured()) HintsCapturedPieceOn(); //if it's a previously captured Piece 
-                    else HintsOn(); //Show where the Piece may move and set respective Permissions
+                    if (activePiece.GetIsCaptured()) Hints.HintsCapturedPieceOn(Field); //if it's a previously captured Piece 
+                    else Hints.HintsOn(activePiece, Field); //Show where the Piece may move and set respective Permissions
                 }
             }
             else //with active piece
             {
+                Console.WriteLine(activePiece);
                 int activePieceColor = activePiece.GetColor();
 
                 if (activePieceColor == selectedPieceColor) //switch pieces if seletion is of same color
                 {
-                    if (activePieceColor == 1) activePiece.Background = Brushes.White;
-                    else activePiece.Background = Brushes.Black;
+                    if (activePieceColor == 1) activePiece.SetColor(1);
+                    else activePiece.SetColor(0);
 
-                    HintsOff(); //Remove all active hints and delete all active Permissions
+                    Hints.HintsOff(Field); //Remove all active hints and delete all active Permissions
                     activePiece = selectedPiece;
                     activePiece.Background = Brushes.Red;
-                    if (activePiece.GetIsCaptured()) HintsCapturedPieceOn(); //if it's a previously captured Piece 
-                    else HintsOn(); //Show where the Piece may move and set respective Permissions
+                    if (activePiece.GetIsCaptured()) Hints.HintsCapturedPieceOn(Field); //if it's a previously captured Piece 
+                    else Hints.HintsOn(activePiece, Field); //Show where the Piece may move and set respective Permissions
                 }
                 else //move and/or capture pieces
                 {
@@ -182,62 +177,129 @@ namespace Shogi_v_1_0
 
                     if (Field[selectedPieceRow, selectedPieceColumn].GetPermission())//if movement is allowed
                     {
-                        int column;
                         int gameOver = 0;
 
-                        for (column = 1; column < 10; column++)
+                        if (activePieceColor == 1) //if captured piece is black
                         {
-                            if (activePieceColor == 1 && Field[0, column].GetPermission()) //find free spot outside of board if captured piece is black
+                            if (selectedPiece is Pawn)
                             {
-                                Field[0, column].SetPermission(false);//block free spot
-                                Grid.SetRow(selectedPiece, 0);//move captured piece to free spot
-                                Grid.SetColumn(selectedPiece, column);
-                                selectedPiece.SetColor(1);//change captured piece color to white
-                                selectedPiece.SetIsCaptured(true);//flag captured piece as captured
-                                if (mainMenu.WinCondition(selectedPiece.GetIsKing(), 1) == 1)//check if captured piece is King and possibly reset board
-                                {
-                                    HintsOff();
-                                    mainMenu.SetPiecePositions(whitePieces, blackPieces);
-                                    mainMenu.ResetPieceStates(whitePieces, blackPieces);
-                                    mainMenu.ResetFieldColors(Field);
-                                    mainMenu.InitFieldColors(Field);
-                                    activePiece = null;
-                                    activePlayer = 1;
-                                    gameOver = 1;
-                                }
-                                activePiece.Background = Brushes.White;//reset activePiece color
-                                break;//stop
+                                Grid.SetColumn(selectedPiece, 1);
+                                whitePieceCounter[0].IncreaseCounter();
                             }
-                            if (activePieceColor == 0 && Field[10, column].GetPermission()) // find free spot outside of board if captured piece is white
+                            if (selectedPiece is Lance)
                             {
-                                Field[10, column].SetPermission(false);//block free spot
-                                Grid.SetRow(selectedPiece, 10);//move captured piece to free spot
-                                Grid.SetColumn(selectedPiece, column);
-                                selectedPiece.SetColor(0);//change captured piece color to black
-                                selectedPiece.SetIsCaptured(true);//flag captured piece as captured
-                                if (mainMenu.WinCondition(selectedPiece.GetIsKing(), 0) == 1)//check if captured piece is King and possibly reset board
-                                {
-                                    HintsOff();
-                                    mainMenu.SetPiecePositions(whitePieces, blackPieces);
-                                    mainMenu.ResetPieceStates(whitePieces, blackPieces);
-                                    mainMenu.ResetFieldColors(Field);
-                                    mainMenu.InitFieldColors(Field);
-                                    activePiece = null;
-                                    activePlayer = 1;
-                                    gameOver = 1;
-                                }
-                                activePiece.Background = Brushes.Black;//reset activePiece color
-                                break;//stop
+                                Grid.SetColumn(selectedPiece, 2);
+                                whitePieceCounter[1].IncreaseCounter();
+                            }
+                            if (selectedPiece is Knight)
+                            {
+                                Grid.SetColumn(selectedPiece, 3);
+                                whitePieceCounter[2].IncreaseCounter();
+                            }
+                            if (selectedPiece is SilverGeneral)
+                            {
+                                Grid.SetColumn(selectedPiece, 4);
+                                whitePieceCounter[3].IncreaseCounter();
+                            }
+                            if (selectedPiece is GoldGeneral)
+                            {
+                                Grid.SetColumn(selectedPiece, 5);
+                                whitePieceCounter[4].IncreaseCounter();
+                            }
+                            if (selectedPiece is Tower)
+                            {
+                                Grid.SetColumn(selectedPiece, 6);
+                                whitePieceCounter[5].IncreaseCounter();
+                            }
+                            if (selectedPiece is Bishop)
+                            {
+                                Grid.SetColumn(selectedPiece, 7);
+                                whitePieceCounter[6].IncreaseCounter();
+                            }
+                            Grid.SetRow(selectedPiece, 0);//move captured piece to designated spot outside of board
+                            selectedPiece.SetColor(1);//change captured piece color to white
+                            selectedPiece.SetIsCaptured(true);//flag captured piece as captured
+                            selectedPiece.SetIsPromoted(false);//strip capturedPiece of Promotion
+                            activePiece.SetColor(1);//reset activePiece color
+                            if (Menu.WinCondition(selectedPiece is King, 1) == 1)//check if captured piece is King and possibly reset board
+                            {
+                                Hints.HintsOff(Field);
+                                Menu.SetPiecePositions(whitePieces, blackPieces);
+                                Menu.ResetPieceStates(whitePieces, blackPieces);
+                                Menu.ResetPieceCounter(blackPieceCounter, whitePieceCounter);
+                                Menu.ResetFieldColors(Field);
+                                Menu.InitFieldColors(Field);
+                                activePiece = null;
+                                activePlayer = 1;
+                                Menu.SetPlayerText(TurnLine, activePlayer);
+                                gameOver = 1;
                             }
                         }
+                        if (activePieceColor == 0) //if captured piece is white
+                        {
+                            if (selectedPiece is Pawn)
+                            {
+                                Grid.SetColumn(selectedPiece, 1);
+                                blackPieceCounter[0].IncreaseCounter();
+                            }
+                            if (selectedPiece is Lance)
+                            {
+                                Grid.SetColumn(selectedPiece, 2);
+                                blackPieceCounter[1].IncreaseCounter();
+                            }
+                            if (selectedPiece is Knight)
+                            {
+                                Grid.SetColumn(selectedPiece, 3);
+                                blackPieceCounter[2].IncreaseCounter();
+                            }
+                            if (selectedPiece is SilverGeneral)
+                            {
+                                Grid.SetColumn(selectedPiece, 4);
+                                blackPieceCounter[3].IncreaseCounter();
+                            }
+                            if (selectedPiece is GoldGeneral)
+                            {
+                                Grid.SetColumn(selectedPiece, 5);
+                                blackPieceCounter[4].IncreaseCounter();
+                            }
+                            if (selectedPiece is Tower)
+                            {
+                                Grid.SetColumn(selectedPiece, 6);
+                                blackPieceCounter[5].IncreaseCounter();
+                            }
+                            if (selectedPiece is Bishop)
+                            {
+                                Grid.SetColumn(selectedPiece, 7);
+                                blackPieceCounter[6].IncreaseCounter();
+                            }
+                            Grid.SetRow(selectedPiece, 10);//move captured piece to designated spot outside of board
+                            selectedPiece.SetColor(0);//change captured piece color to black
+                            selectedPiece.SetIsCaptured(true);//flag captured piece as captured
+                            selectedPiece.SetIsPromoted(false);//strip capturedPiece of Promotion
+                            activePiece.SetColor(0);//reset activePiece color
+                            if (Menu.WinCondition(selectedPiece is King, 0) == 1)//check if captured piece is King and possibly reset board
+                            {
+                                Hints.HintsOff(Field);
+                                Menu.SetPiecePositions(whitePieces, blackPieces);
+                                Menu.ResetPieceStates(whitePieces, blackPieces);
+                                Menu.ResetFieldColors(Field);
+                                Menu.InitFieldColors(Field);
+                                Menu.ResetPieceCounter(blackPieceCounter, whitePieceCounter);
+                                activePiece = null;
+                                activePlayer = 1;
+                                Menu.SetPlayerText(TurnLine, activePlayer);
+                                gameOver = 1;
+                            }
+                        }
+
                         if (gameOver == 0)//only if King is still in play
                         {
-                            HintsOff();
+                            Hints.HintsOff(Field); //reset field background colors and revoke permissions
                             Field[activePieceRow, activePieceColumn].SetColor(2);//set old field to neutral
                             Grid.SetRow(activePiece, selectedPieceRow);//move activePiece to new field
                             Grid.SetColumn(activePiece, selectedPieceColumn);
                             Field[selectedPieceRow, selectedPieceColumn].SetColor(activePieceColor);//set new field to activePieces color
-                            if ((selectedPieceRow >= 7 && activePieceColor == 1 && activePiece.GetIsPromoted() == false)) //if whitePiece reached enemy Territory and is not yet promoted ask for promotion 
+                            if (selectedPieceRow >= 7 && activePieceColor == 1 && activePiece.GetIsPromoted() == false) //if whitePiece reached enemy Territory and is not yet promoted ask for promotion 
                             {
                                 MessageBoxResult result;
                                 result = MessageBox.Show("Promote?", "", MessageBoxButton.YesNo);
@@ -246,7 +308,7 @@ namespace Shogi_v_1_0
                                     activePiece.SetIsPromoted(true);
                                 }
                             }
-                            if ((selectedPieceRow <= 3 && activePieceColor == 0 && activePiece.GetIsPromoted() == false)) //if blackPiece reached enemy Territory and is not yet promoted ask for promotion
+                            if (selectedPieceRow <= 3 && activePieceColor == 0 && activePiece.GetIsPromoted() == false) //if blackPiece reached enemy Territory and is not yet promoted ask for promotion
                             {
                                 MessageBoxResult result;
                                 result = MessageBox.Show("Promote?", "", MessageBoxButton.YesNo);
@@ -255,8 +317,9 @@ namespace Shogi_v_1_0
                                     activePiece.SetIsPromoted(true);
                                 }
                             }
-                            activePiece = null;
-                            activePlayer = activePlayer == 1 ? 0 : 1;
+                            activePiece = null; // let go of active Piece
+                            activePlayer = activePlayer == 1 ? 0 : 1; //Switch Player
+                            Menu.SetPlayerText(TurnLine, activePlayer);
                         }
                     }
                 }
@@ -265,10 +328,11 @@ namespace Shogi_v_1_0
 
         public void Move(object sender, RoutedEventArgs e)
         {
+            Field activeField = sender as Field;
+
+            if (activeField.GetColor() != 2) return;//don't do anything if the field is occupied (Player should select the Piece on it instead)
             if (activePiece != null) //Do nothing if no Piece is active
             {
-                activeField = sender as Field;
-
                 int pieceRow = Grid.GetRow(activePiece);
                 int pieceColumn = Grid.GetColumn(activePiece);
                 int fieldRow = Grid.GetRow(activeField);
@@ -279,14 +343,15 @@ namespace Shogi_v_1_0
                 {
                     if (activePiece.GetIsCaptured()) //for pieces outside the board
                     {
-                        activePiece.SetIsCaptured(false); //uncapture
-                        Field[pieceRow, pieceColumn].SetPermission(true); //free space
+                        activePiece.SetIsCaptured(false);
+                        if (activePlayer == 1) whitePieceCounter[pieceColumn - 1].DecreaseCounter();
+                        if (activePlayer == 0) blackPieceCounter[pieceColumn - 1].DecreaseCounter();
                     }
                     else Field[pieceRow, pieceColumn].SetColor(2); //make old field neutral
 
                     if (activePieceColor == 1)//for white pieces
                     {
-                        activePiece.Background = Brushes.White;
+                        activePiece.SetColor(1);
                         activeField.SetColor(1);
                         if (fieldRow >= 7 && activePiece.GetIsPromoted() == false)//if reached enemy Territory and is not promoted ask for promotion
                         {
@@ -300,7 +365,7 @@ namespace Shogi_v_1_0
                     }
                     else//for black pieces
                     {
-                        activePiece.Background = Brushes.Black;
+                        activePiece.SetColor(0);
                         activeField.SetColor(0);
                         if (fieldRow <= 3 && activePiece.GetIsPromoted() == false)//if reached enemy Territory and is not promoted ask for promotion
                         {
@@ -313,331 +378,61 @@ namespace Shogi_v_1_0
                         }
                     }
 
-                    HintsOff(); //delete all hints and permissions
+                    Hints.HintsOff(Field); //delete all hints and permissions
                     Grid.SetRow(activePiece, fieldRow);
                     Grid.SetColumn(activePiece, fieldColumn);
                     activePiece = null;
                     activePlayer = activePlayer == 1 ? 0 : 1;
+                    Menu.SetPlayerText(TurnLine, activePlayer);
                 }
                 else //if move not allowed
                 {
-                    HintsOff(); //delete all hints and permissions
+                    Hints.HintsOff(Field); //delete all hints and permissions
                     if (activePieceColor == 1)
                     {
-                        activePiece.Background = Brushes.White;
+                        activePiece.SetColor(1);
                     }
                     else
                     {
-                        activePiece.Background = Brushes.Black;
+                        activePiece.SetColor(0);
                     }
                     activePiece = null;
                 }
             }
         }
 
-
-        public void HintsOn()
-        {
-            //Check all fields in a direction if movement of active Piece is generally allowed and which color the field has
-            //if the Field is empty (allegiance value 2), highlight it and give permission on field then check next field in same direction
-            //if field has different color than active piece, set hint and give permission, then check next direction            
-            //if movement is not allowed or field has same color as active piece, check next direction
-
-            int activePieceRow = Grid.GetRow(activePiece);
-            int activePieceColumn = Grid.GetColumn(activePiece);
-            int fieldRow = activePieceRow;//keeping activePieceRow for reset purposes
-            int fieldColumn = activePieceColumn;//keeping activePiececolumn for reset purposes
-
-            //all fields in straight line downwards
-            for (fieldRow = activePieceRow + 1; fieldRow < 10; fieldRow++)
-            {
-                if (activePiece.IsMoveAllowed(fieldRow, activePieceColumn))//if direction is still allowed
-                {
-                    if (activePiece.GetColor() != Field[fieldRow, fieldColumn].GetColor())//if there is no piece of the same color already
-                    {
-                        Field[fieldRow, activePieceColumn].SetPermission(true);
-                        Field[fieldRow, activePieceColumn].Background = Brushes.Tomato;
-                        if (Field[fieldRow, fieldColumn].GetColor() != 2) break;//check next direction if the field is occupied
-                    }
-                    else break;//check next direction if there's a piece of the same color already
-                }
-                else break;//check next direction if this one is not allowed anymore
-            }
-
-            //all fields in straight line upwards
-            for (fieldRow = activePieceRow - 1; fieldRow > 0; fieldRow--)
-            {
-                if (activePiece.IsMoveAllowed(fieldRow, activePieceColumn))//if direction is still allowed
-                {
-                    if (activePiece.GetColor() != Field[fieldRow, fieldColumn].GetColor())//if there is no piece of the same color already
-                    {
-                        Field[fieldRow, activePieceColumn].SetPermission(true);
-                        Field[fieldRow, activePieceColumn].Background = Brushes.Tomato;
-                        if (Field[fieldRow, fieldColumn].GetColor() != 2) break;//check next direction if the field is occupied
-                    }
-                    else break;
-                }
-                else break;
-            }
-
-            fieldRow = activePieceRow;//reset row position
-            //all fields in straight line to the right
-            for (fieldColumn = activePieceColumn + 1; fieldColumn < 10; fieldColumn++)
-            {
-                if (activePiece.IsMoveAllowed(activePieceRow, fieldColumn))//if direction is still allowed
-                {
-                    if (activePiece.GetColor() != Field[fieldRow, fieldColumn].GetColor())//if there is no piece of the same color already
-                    {
-                        Field[activePieceRow, fieldColumn].SetPermission(true);
-                        Field[activePieceRow, fieldColumn].Background = Brushes.Tomato;
-                        if (Field[fieldRow, fieldColumn].GetColor() != 2) break;//check next direction if the field is occupied
-                    }
-                    else break;//check next direction if there's a piece of the same color already
-                }
-                else break;//check next direction if this one is not allowed anymore
-            }
-
-            //all fields in straight line to the left
-            for (fieldColumn = activePieceColumn - 1; fieldColumn > 0; fieldColumn--)
-            {
-                if (activePiece.IsMoveAllowed(activePieceRow, fieldColumn))//if direction is still allowed
-                {
-                    if (activePiece.GetColor() != Field[fieldRow, fieldColumn].GetColor())//if there is no piece of the same color already
-                    {
-                        Field[activePieceRow, fieldColumn].SetPermission(true);
-                        Field[activePieceRow, fieldColumn].Background = Brushes.Tomato;
-                        if (Field[fieldRow, fieldColumn].GetColor() != 2) break;//check next direction if the field is occupied
-                    }
-                    else break;//check next direction if there's a piece of the same color already
-                }
-                else break;//check next direction if this one is not allowed anymore
-            }
-
-            //all fields diagonally right downwards
-            for (fieldColumn = activePieceColumn + 1; fieldColumn < 10; fieldColumn++)
-            {
-                if (fieldRow < 9) fieldRow++;
-                else break;
-
-                if (activePiece.IsMoveAllowed(fieldRow, fieldColumn))//if direction is still allowed
-                {
-                    if (activePiece.GetColor() != Field[fieldRow, fieldColumn].GetColor())//if there is no piece of the same color already
-                    {
-                        Field[fieldRow, fieldColumn].SetPermission(true);
-                        Field[fieldRow, fieldColumn].Background = Brushes.Tomato;
-                        if (Field[fieldRow, fieldColumn].GetColor() != 2) break;//check next direction if the field is occupied
-                    }
-                    else break;//check next direction if there's a piece of the same color already
-                }
-                else break;//check next direction if this one is not allowed anymore
-            }
-
-            fieldRow = activePieceRow;//reset row position
-            //all fields diagonally right upwards
-            for (fieldColumn = activePieceColumn + 1; fieldColumn < 10; fieldColumn++)
-            {
-                if (fieldRow > 1) fieldRow--;
-                else break;
-
-                if (activePiece.IsMoveAllowed(fieldRow, fieldColumn))//if direction is still allowed
-                {
-                    if (activePiece.GetColor() != Field[fieldRow, fieldColumn].GetColor())//if there is no piece of the same color already
-                    {
-                        Field[fieldRow, fieldColumn].SetPermission(true);
-                        Field[fieldRow, fieldColumn].Background = Brushes.Tomato;
-                        if (Field[fieldRow, fieldColumn].GetColor() != 2) break;//check next direction if the field is occupied
-                    }
-                    else break;//check next direction if there's a piece of the same color already
-                }
-                else break;//check next direction if this one is not allowed anymore
-            }
-
-            fieldRow = activePieceRow;//reset row position
-            //all fields diagonally left downwards
-            for (fieldColumn = activePieceColumn - 1; fieldColumn > 0; fieldColumn--)
-            {
-                if (fieldRow < 9) fieldRow++;
-                else break;
-
-                if (activePiece.IsMoveAllowed(fieldRow, fieldColumn))//if direction is still allowed
-                {
-                    if (activePiece.GetColor() != Field[fieldRow, fieldColumn].GetColor())//if there is no piece of the same color already
-                    {
-                        Field[fieldRow, fieldColumn].SetPermission(true);
-                        Field[fieldRow, fieldColumn].Background = Brushes.Tomato;
-                        if (Field[fieldRow, fieldColumn].GetColor() != 2) break;//check next direction if the field is occupied
-                    }
-                    else break;//check next direction if there's a piece of the same color already
-                }
-                else break;//check next direction if this one is not allowed anymore
-            }
-
-            fieldRow = activePieceRow;//reset row position
-            //all fields diagonally left upwards
-            for (fieldColumn = activePieceColumn - 1; fieldColumn > 0; fieldColumn--)
-            {
-                if (fieldRow > 1) fieldRow--;
-                else break;
-
-                if (activePiece.IsMoveAllowed(fieldRow, fieldColumn))//if direction is still allowed
-                {
-                    if (activePiece.GetColor() != Field[fieldRow, fieldColumn].GetColor())//if there is no piece of the same color already
-                    {
-                        Field[fieldRow, fieldColumn].SetPermission(true);
-                        Field[fieldRow, fieldColumn].Background = Brushes.Tomato;
-                        if (Field[fieldRow, fieldColumn].GetColor() != 2) break;//check next direction if the field is occupied
-                    }
-                    else break;//check next direction if there's a piece of the same color already
-                }
-                else break;//check next direction if this one is not allowed anymore
-            }
-
-            fieldRow = activePieceRow;//reset row position
-            fieldColumn = activePieceColumn;//reset column position
-            //Knight specific fields
-            if (activePiece.GetColor() == 0)//if black
-            {
-                if (activePiece.IsMoveAllowed(fieldRow - 2, fieldColumn + 1))//Checking 2 up 1 right
-                {
-                    if (activePiece.GetColor() != Field[fieldRow - 2, fieldColumn + 1].GetColor())//if there is no piece of the same color already
-                    {
-                        Field[fieldRow - 2, fieldColumn + 1].SetPermission(true);
-                        Field[fieldRow - 2, fieldColumn + 1].Background = Brushes.Tomato;
-                    }
-                }
-                if (activePiece.IsMoveAllowed(fieldRow - 2, fieldColumn - 1))//Checking 2 up 1 left
-                {
-                    if (activePiece.GetColor() != Field[fieldRow - 2, fieldColumn - 1].GetColor())//if there is no piece of the same color already
-                    {
-                        Field[fieldRow - 2, fieldColumn - 1].SetPermission(true);
-                        Field[fieldRow - 2, fieldColumn - 1].Background = Brushes.Tomato;
-                    }
-                }
-            }
-            else//if white
-            {
-                if (activePiece.IsMoveAllowed(fieldRow + 2, fieldColumn + 1))//Checking 2 down 1 right
-                {
-                    if (activePiece.GetColor() != Field[fieldRow + 2, fieldColumn + 1].GetColor())//if there is no piece of the same color already
-                    {
-                        Field[fieldRow + 2, fieldColumn + 1].SetPermission(true);
-                        Field[fieldRow + 2, fieldColumn + 1].Background = Brushes.Tomato;
-                    }
-                }
-                if (activePiece.IsMoveAllowed(fieldRow + 2, fieldColumn - 1))//Checking 2 down 1 left
-                {
-                    if (activePiece.GetColor() != Field[fieldRow + 2, fieldColumn - 1].GetColor())//if there is no piece of the same color already
-                    {
-                        Field[fieldRow + 2, fieldColumn - 1].SetPermission(true);
-                        Field[fieldRow + 2, fieldColumn - 1].Background = Brushes.Tomato;
-                    }
-                }
-            }
-        }
-
-        public void HintsCapturedPieceOn()
-        {
-            int Row;
-            int Column;
-
-            for (Row = 1; Row < 10; Row++)
-            {
-                for (Column = 1; Column < 10; Column++)
-                {
-                    if (Field[Row, Column].GetColor() == 2)
-                    {
-                        Field[Row, Column].Background = Brushes.Tomato;
-                        Field[Row, Column].SetPermission(true);
-                    }
-                }
-            }
-        }
-
-        public void HintsOff()
-        {
-            int Row;
-            int Column;
-
-            for (Row = 1; Row < 10; Row++)
-            {
-                for (Column = 1; Column < 10; Column++)
-                {
-                    if (Field[Row, Column].GetPermission())
-                    {
-                        Field[Row, Column].Background = Brushes.LightGray;
-                        Field[Row, Column].SetPermission(false);
-                    }
-                }
-            }
-        }
 
         //Close the application
         private void Quit_Click(object sender, RoutedEventArgs e)
         {
             Environment.Exit(0);
         }
+
         //return to initial board conditions
         private void Reset_Click(object sender, RoutedEventArgs e)
         {
-            mainMenu.ResetFieldColors(Field);//set all fields to neutral and free fields above and below the board
-            HintsOff();//delete all move permissions and reset highlightings
-            mainMenu.SetPiecePositions(whitePieces, blackPieces);//return all Pieces to starting positions
-            mainMenu.ResetPieceStates(whitePieces, blackPieces);//return all Piece colors to normal and reset IsCaptured value
-            mainMenu.InitFieldColors(Field);//set all now occupied fields to their respective color
+            Menu.ResetFieldColors(Field);//set all fields to neutral and free fields above and below the board
+            Hints.HintsOff(Field);//delete all move permissions and reset highlightings
+            Menu.SetPiecePositions(whitePieces, blackPieces);//return all Pieces to starting positions
+            Menu.ResetPieceStates(whitePieces, blackPieces);//return all Piece colors to normal and reset IsCaptured value
+            Menu.InitFieldColors(Field);//set all now occupied fields to their respective color
+            Menu.ResetPieceCounter(blackPieceCounter, whitePieceCounter);
             activePiece = null; //delete active Piece value
             activePlayer = 1; //reset starting player to white
+            Menu.SetPlayerText(TurnLine, activePlayer);
         }
 
-        //should save to human readible textfile:
-        //- field colors and permissions for all Field Objects in Field Array
-        //- row and column values for blackPieces
-        //- row and column values for whitePieces
-        //does not work... windows does not give writing permission even in application folder, could not determine why
-        //can't find out how to ask for permissions, no solution I found actually works
-        //SaveFileDialog in namespace Windows.System.Forms should allow for user selectable filepath and filename as well as give necessary Permissions
-        //-> namespace Windows.System.Forms does not exist even though it should (.NET Framework 4.7)
+        //Can't get Read or Write Permissions from Windows UAC. Don't know why.
         private void Save_Click(object sender, RoutedEventArgs e)
         {
-            //string dir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            //    int row;
-            //    int column;
-            //    int index;
-            //    string save = "[FieldStatus]" + Environment.NewLine + Environment.NewLine;
+            MessageBoxResult notification;
+            notification = MessageBox.Show("Sorry this feature is not yet implemented", "", MessageBoxButton.OK);
+        }
 
-            //    for(row=0; row<11; row++)
-            //    {
-            //        for(column=1; column<10; column++)
-            //        {
-            //            int color = Field[row, column].GetColor();
-            //            bool permission = Field[row, column].GetPermission();
-            //            string FieldName = "Field[" + row.ToString() +","+ column.ToString() + "]" + Environment.NewLine;
-            //            save += FieldName + "[Color]=" + color.ToString() + " [Permission]=" + permission.ToString() + Environment.NewLine;
-            //        }
-            //    }
-
-            //System.IO.File.WriteAllText(dir, save);
-
-            //    save = Environment.NewLine + "[whitePieces]" + Environment.NewLine;
-
-            //    for(index=0; index<20; index++)
-            //    {
-            //        row = Grid.GetRow(whitePieces[index]);
-            //        column = Grid.GetColumn(whitePieces[index]);
-            //        string PieceName = "whitePiece[" + index.ToString() + "]" + Environment.NewLine;
-            //        save += PieceName + "[Row]=" + row.ToString() + " [Column]=" + column.ToString() + Environment.NewLine;
-            //    }
-
-            //    System.IO.File.AppendAllText(dir, save);
-            //    save = Environment.NewLine + "[blackPieces]" + Environment.NewLine;
-
-            //    for (index = 0; index < 20; index++)
-            //    {
-            //        row = Grid.GetRow(blackPieces[index]);
-            //        column = Grid.GetColumn(blackPieces[index]);
-            //        string PieceName = "blackPiece[" + index.ToString() + "]" + Environment.NewLine;
-            //        save += PieceName + "[Row]=" + row.ToString() + " [Column]=" + column.ToString() + Environment.NewLine;
-            //    }
-            //    System.IO.File.AppendAllText(dir, save);
+        private void Load_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBoxResult notification;
+            notification = MessageBox.Show("Sorry this feature is not yet implemented", "", MessageBoxButton.OK);
         }
     }
 }
